@@ -15,7 +15,11 @@ const NewBook = () => {
   const submit = async (event) => {
     event.preventDefault()
     const dPublished = Number.parseInt(published, 10)
-    addBook({ variables: { title, author, published: dPublished, genres }})
+    try {
+      await addBook({ variables: { title, author, published: dPublished, genres }})
+    } catch (error) {
+      console.log('Add book error: ', error.graphQLErrors)
+    }
 
     setTitle('')
     setAuhtor('')
@@ -30,7 +34,15 @@ const NewBook = () => {
   }
 
   if (loading) return <div>Loading...</div>
-  if (error) return <div>Error</div>
+  if (error) return (
+    <div>
+      <pre>Error: {error.graphQLErrors.map(({ message }, i) => (
+          <span key={i}>{message}</span>
+        ))}
+        </pre>
+    </div>
+  )
+
   return (
     <div>
       <form onSubmit={submit}>

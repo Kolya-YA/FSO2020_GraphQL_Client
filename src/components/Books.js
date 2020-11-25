@@ -6,7 +6,9 @@ import { ALL_BOOKS } from '../queries'
 const Books = () => {
   const { loading, error, data } = useQuery(ALL_BOOKS)
   if (loading) return <div>Loading...</div>
-  if (error) return <div>Error</div>
+  if (error) {
+  console.log('Error: ', error)
+  return <div>Error {error.data}</div>}
 
   const books = data.allBooks
 
@@ -24,7 +26,7 @@ const Books = () => {
           {books.map(a =>
             <tr key={a.title}>
               <td>{a.title}</td>
-              <td>{a.author}</td>
+              <td>{a.author.name}</td>
               <td>{a.published}</td>
             </tr>
           )}
