@@ -1,22 +1,32 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { Route, Switch } from 'react-router-dom'
 import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
+import TopNav from './components/TopNav'
 
 const App = () => {
-  const [page, setPage] = useState('authors')
+  const [token, setToken] = useState(null)
+
+  useEffect(() => {
+    const loggedUserToken = localStorage.getItem('books-user-token')
+    if (loggedUserToken && !token) setToken(loggedUserToken)
+  }, [token])
 
   return (
     <div>
-      <div>
-        <button onClick={() => setPage('authors')}>Authors</button>
-        <button onClick={() => setPage('books')}>Books</button>
-        <button onClick={() => setPage('add')}>Add book</button>
-      </div>
-
-      {page === 'authors' && <Authors />}
-      {page === 'books' && <Books />}
-      {page === 'add' && <NewBook />}
+      <TopNav token={token} setToken={setToken} />
+      <Switch>
+        <Route path='/add_book'>
+          <NewBook />
+        </Route>
+        <Route path='/books'>
+          <Books />
+        </Route>
+        <Route path='/'>
+          <Authors />
+        </Route>
+      </Switch>
     </div>
   )
 }
