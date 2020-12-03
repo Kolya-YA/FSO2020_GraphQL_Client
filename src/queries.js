@@ -7,10 +7,18 @@ query {
     author {
       name
     }
-    published
+    published,
+    genres
   }
 }
 `
+
+export const ALL_GENRES = gql`
+query {
+  allGenres
+}
+`
+
 
 export const ALL_AUTHORS = gql`
 query {
