@@ -4,21 +4,23 @@ import { useState, useEffect } from 'react'
 import { LOGIN } from '../queries'
 
 const LoginForm = props => {
-  const { loginHandler, setToken } = props
+  const { loginHandler, setUser } = props
   const [input, setInput] = useState({ login: 'James Bond', password: 'secret' })
 
   const [loginReq, loginRes] = useMutation(LOGIN, {
     onError: error => {
-      console.log('Error: ', error.graphQLErrors[0].message)
+      console.log('Error: ', error.graphQLErrors[0]?.message)
     }
   })
 
   useEffect(() => {
     if (loginRes.data) {
       const token = loginRes.data.login.value
-      setToken(token)
-      localStorage.setItem('books-user-token', token)
-      console.log('logRes', token)
+      const { username, favoriteGenre } = loginRes.data.login.user
+      const bookUser = { token, username, favoriteGenre }
+      console.log('Books user: ', bookUser)
+      setUser(bookUser)
+      localStorage.setItem('books-user', JSON.stringify(bookUser))
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loginRes.data])

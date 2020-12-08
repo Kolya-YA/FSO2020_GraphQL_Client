@@ -7,11 +7,11 @@ import { BrowserRouter as Router } from 'react-router-dom'
 const httpLink = new HttpLink({ uri: 'http://localhost:4000/' })
 
 const authMiddleware = new ApolloLink((operation, forward) => {
-  const token = localStorage.getItem('books-user-token')
+  const user = JSON.parse(localStorage.getItem('books-user'))
   operation.setContext(({ headers = {} }) => ({
     headers: {
       ...headers,
-      authorization: token ? `bearer ${token}` : null
+      authorization: user?.token ? `bearer ${user.token}` : null
     }
   }))
   

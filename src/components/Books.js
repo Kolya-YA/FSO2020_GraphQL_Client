@@ -2,17 +2,29 @@ import React from 'react'
 import { useQuery } from '@apollo/client'
 
 import { ALL_BOOKS, ALL_GENRES } from '../queries'
-import { useState } from 'react'
 
-const Books = () => {
+const Books = props => {
 
-  const [genresFilter, setGenresFilter] = useState(null)
+  const {
+    genresFilter,
+    setGenresFilter,
+    user
+  } = props
 
-  const { loading: allBooksLoading, error: allBooksError, data: allBooksData } = useQuery(ALL_BOOKS)
-  const { loading: allGenresLoading, error: allGenresError, data: allGenresData } = useQuery(ALL_GENRES)
+  // const [userFavoriteGenre, setUserFavoriteGenre] = useState(null)
+
+  const {
+    loading: allBooksLoading,
+    error: allBooksError,
+    data: allBooksData
+  } = useQuery(ALL_BOOKS)
+  const {
+    loading: allGenresLoading,
+    error: allGenresError,
+    data: allGenresData
+  } = useQuery(ALL_GENRES)
 
   const BookList = () => {
-
     if (allBooksLoading) return <div>Loading books...</div>
     if (allBooksError) {
       console.log('allBooksError: ', allBooksError)
@@ -24,22 +36,22 @@ const Books = () => {
         allBooksData.allBooks
 
       return (
-      <table>
-        <tbody>
-          <tr>
-            <th>Title</th>
-            <th>Author</th>
-            <th>Published</th>
-          </tr>
-          {books.map(a =>
-            <tr key={a.title}>
-              <td>{a.title}</td>
-              <td>{a.author.name}</td>
-              <td>{a.published}</td>
+        <table>
+          <tbody>
+            <tr>
+              <th>Title</th>
+              <th>Author</th>
+              <th>Published</th>
             </tr>
-          )}
-        </tbody>
-      </table>
+            {books.map(a =>
+              <tr key={a.title}>
+                <td>{a.title}</td>
+                <td>{a.author.name}</td>
+                <td>{a.published}</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       )
   }
 
@@ -50,25 +62,37 @@ const Books = () => {
       console.log('allBooksError: ', allGenresError)
       return <div>Genres error: {allGenresError.data}</div>
     }
-    const genres = ['All books'].concat(allGenresData.allGenres)
+    const genres = user ?
+      ['Recomended', 'All books'].concat(allGenresData.allGenres) :
+      ['All books'].concat(allGenresData.allGenres)
 
     const genresSelectorHandler = event => {
-      const filter = event.target.value === 'All books' ? null : event.target.value
-      setGenresFilter(filter) 
+      switch (event.target.value) {
+        case 'All books':
+          setGenresFilter(null)
+          break
+        case 'Recomended':
+          setGenresFilter(user.favoriteGenre)
+          break      
+        default:
+          setGenresFilter(event.target.value)
+          break
+      }
     }
 
     return (
-      <p>
-      {genres.map(g => 
-        <button
-          key={g}
-          value={g}
-          onClick={genresSelectorHandler}
-        >
-          {g}
-        </button>
-      )}
-      </p>
+      <div>
+        {}
+        {genres.map(g => 
+          <button
+            key={g}
+            value={g}
+            onClick={genresSelectorHandler}
+          >
+            {g}
+          </button>
+        )}
+      </div>
     )
   }
 

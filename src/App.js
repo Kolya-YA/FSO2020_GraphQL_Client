@@ -3,25 +3,35 @@ import { Route, Switch } from 'react-router-dom'
 import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
-import TopNav from './components/TopNav'
+import Header from './components/Header'
 
 const App = () => {
-  const [token, setToken] = useState(null)
+  const [user, setUser] = useState({})
+  const [genresFilter, setGenresFilter] = useState(null)
 
   useEffect(() => {
-    const loggedUserToken = localStorage.getItem('books-user-token')
-    if (loggedUserToken && !token) setToken(loggedUserToken)
-  }, [token])
+    const loggedUser = JSON.parse(localStorage.getItem('books-user'))
+    if (loggedUser && !user.token) {
+      setUser(loggedUser)
+    }
+  }, [user])
 
   return (
     <div>
-      <TopNav token={token} setToken={setToken} />
+      <Header
+        user={user} setUser={setUser}
+        genresFilter={genresFilter} setGenresFilter={setGenresFilter}
+      />
       <Switch>
         <Route path='/add_book'>
           <NewBook />
         </Route>
         <Route path='/books'>
-          <Books />
+          <Books
+            user={user}
+            genresFilter={genresFilter}
+            setGenresFilter={setGenresFilter}
+          />
         </Route>
         <Route path='/'>
           <Authors />

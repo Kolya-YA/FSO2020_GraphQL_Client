@@ -4,15 +4,15 @@ import { NavLink } from 'react-router-dom'
 
 import LoginForm from './LoginForm'
 
-const TopNav = props => {
-  const { token, setToken } = props
+const Header = props => {
+  const { user, setUser } = props
 
   const [showLoginForm, setShowLoginForm] = useState(true)
   const client = useApolloClient()
 
   const logoutHandler = event => {
     console.log('Logout')
-    setToken(null)
+    setUser({})
     localStorage.clear()
     client.resetStore()
     event.preventDefault()
@@ -24,38 +24,37 @@ const TopNav = props => {
   }
 
   return (
-    <nav>
-      <ul>
-        <li>
-          <NavLink to='/'>Authors</NavLink>
-        </li>
-        <li>
-          <NavLink to='/books'>Books</NavLink>
-        </li>
-        {token ?
-          <>
+    <header>
+      <nav>
+        <ul>
+          <li>
+            <NavLink to='/'>Authors</NavLink>
+          </li>
+          <li>
+            <NavLink to='/books'>Books</NavLink>
+          </li>
+          {user.token &&
             <li>
               <NavLink to='/add_book'>Add book</NavLink>
             </li>
-            <li>
-              <NavLink to='/' onClick={logoutHandler}>Logout</NavLink>
-            </li>
-          </>
-        :
-          <li>
-            <NavLink to='#' onClick={loginHandler}>Login</NavLink>
-          </li>
+          }
+        </ul>
+      </nav>
+      <div>
+        {user.token ?
+          <button onClick={logoutHandler}>Logout</button> :
+          <button to='#' onClick={loginHandler}>Login</button>
         }
-      </ul>
+      </div>
       <hr />
-      {!token && showLoginForm &&
+      {!user.token && showLoginForm &&
         <LoginForm
           loginHandler={loginHandler}
-          setToken={setToken}
+          setUser={setUser}
         />
       }
-    </nav>
+      </header>
   )
 }
 
-export default TopNav
+export default Header
