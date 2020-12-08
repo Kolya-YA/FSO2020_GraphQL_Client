@@ -7,7 +7,6 @@ import Header from './components/Header'
 
 const App = () => {
   const [user, setUser] = useState({})
-  const [genresFilter, setGenresFilter] = useState(null)
 
   useEffect(() => {
     const loggedUser = JSON.parse(localStorage.getItem('books-user'))
@@ -19,8 +18,8 @@ const App = () => {
   return (
     <div>
       <Header
-        user={user} setUser={setUser}
-        genresFilter={genresFilter} setGenresFilter={setGenresFilter}
+        user={user}
+        setUser={setUser}
       />
       <Switch>
         <Route path='/add_book'>
@@ -29,8 +28,6 @@ const App = () => {
         <Route path='/books'>
           <Books
             user={user}
-            genresFilter={genresFilter}
-            setGenresFilter={setGenresFilter}
           />
         </Route>
         <Route path='/'>

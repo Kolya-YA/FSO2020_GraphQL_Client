@@ -1,27 +1,36 @@
 import React, { useState } from 'react'
 import { useMutation } from '@apollo/client'
 
-import { ALL_AUTHORS, ALL_BOOKS, CREATE_BOOK } from '../queries'
+import { ALL_BOOKS, ALL_AUTHORS, CREATE_BOOK, ALL_GENRES } from '../queries'
 
 const NewBook = () => {
-  const [title, setTitle] = useState('')
-  const [author, setAuhtor] = useState('')
-  const [published, setPublished] = useState('')
+  const [title, setTitle] = useState('Poor Folk')
+  const [author, setAuhtor] = useState('Fyodor Dostoevsky')
+  const [published, setPublished] = useState('1846')
   const [genre, setGenre] = useState('')
-  const [genres, setGenres] = useState([])
+  const [genres, setGenres] = useState(['epistolary novel'])
 
   const [addBook, { loading, error }] = useMutation(CREATE_BOOK, {
-    refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }]
+    onError: error => {
+      console.log('Add book error: ', error.graphQLErrors[0])
+    },
+    update: (store, response) => {
+      const booksInStore = store.readQuery({ query: ALL_BOOKS })
+      store.writeQuery({
+        query: ALL_BOOKS,
+        data: {
+          ...booksInStore,
+          allBooks: [...booksInStore.allBooks, response.data.addBook]
+        }
+      })
+    },
+    refetchQueries: [{ query: ALL_AUTHORS }, { query: ALL_GENRES }]
   })
 
-  const submit = async (event) => {
+  const submit = (event) => {
     event.preventDefault()
     const dPublished = Number.parseInt(published, 10)
-    try {
-      await addBook({ variables: { title, author, published: dPublished, genres }})
-    } catch (error) {
-      console.log('Add book error: ', error.graphQLErrors)
-    }
+    addBook({ variables: { title, author, published: dPublished, genres }})
 
     setTitle('')
     setAuhtor('')
@@ -36,7 +45,7 @@ const NewBook = () => {
   }
 
   if (loading) return <div>Loading...</div>
-  if (error) return (
+  if (error?.length) return (
     <div>
       <pre>Error: {error.graphQLErrors.map(({ message }, i) => (
           <span key={i}>{message}</span>

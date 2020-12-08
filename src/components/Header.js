@@ -11,7 +11,6 @@ const Header = props => {
   const client = useApolloClient()
 
   const logoutHandler = event => {
-    console.log('Logout')
     setUser({})
     localStorage.clear()
     client.resetStore()

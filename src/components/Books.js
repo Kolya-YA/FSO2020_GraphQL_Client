@@ -1,58 +1,60 @@
-import React from 'react'
-import { useQuery } from '@apollo/client'
+import React, { useState } from 'react'
+import { useLazyQuery, useQuery } from '@apollo/client'
 
 import { ALL_BOOKS, ALL_GENRES } from '../queries'
+import { useEffect } from 'react'
 
-const Books = props => {
+const Books = ({ user }) => {
+  
+  const [getFiltredBooks, {
+    loading: filtredBooksLoading,
+    error: filtredBooksError,
+    data: filtredBooksData
+  }] = useLazyQuery(ALL_BOOKS)
 
-  const {
-    genresFilter,
-    setGenresFilter,
-    user
-  } = props
-
-  // const [userFavoriteGenre, setUserFavoriteGenre] = useState(null)
-
-  const {
-    loading: allBooksLoading,
-    error: allBooksError,
-    data: allBooksData
-  } = useQuery(ALL_BOOKS)
   const {
     loading: allGenresLoading,
     error: allGenresError,
     data: allGenresData
   } = useQuery(ALL_GENRES)
 
+  const [books, setBooks] = useState([])
+  const [genresFilter, setGenresFilter] = useState(null)
+
+  useEffect(() => {
+    genresFilter ?
+      getFiltredBooks({ variables: { genreFilter: genresFilter }}) :
+      getFiltredBooks()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [genresFilter])
+
   const BookList = () => {
-    if (allBooksLoading) return <div>Loading books...</div>
-    if (allBooksError) {
-      console.log('allBooksError: ', allBooksError)
-      return <div>Books error: {allBooksError.data}</div>
+    if (filtredBooksLoading) return <div>Loading books...</div>
+    if (filtredBooksError) {
+      console.log('filtredBooksError: ', filtredBooksError)
+      return <div>Filtred bBooks error: {filtredBooksError.data}</div>
     }
       
-      const books = genresFilter ? 
-        allBooksData.allBooks.filter(b => b.genres.includes(genresFilter)) :
-        allBooksData.allBooks
+    filtredBooksData && setBooks(filtredBooksData.allBooks)
 
-      return (
-        <table>
-          <tbody>
-            <tr>
-              <th>Title</th>
-              <th>Author</th>
-              <th>Published</th>
+    return (
+      <table>
+        <tbody>
+          <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Published</th>
+          </tr>
+          {books.map(a =>
+            <tr key={a.title}>
+              <td>{a.title}</td>
+              <td>{a.author.name}</td>
+              <td>{a.published}</td>
             </tr>
-            {books.map(a =>
-              <tr key={a.title}>
-                <td>{a.title}</td>
-                <td>{a.author.name}</td>
-                <td>{a.published}</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      )
+          )}
+        </tbody>
+      </table>
+    )
   }
 
   const GenreList = () => {
@@ -62,7 +64,7 @@ const Books = props => {
       console.log('allBooksError: ', allGenresError)
       return <div>Genres error: {allGenresError.data}</div>
     }
-    const genres = user ?
+    const genres = user.token ?
       ['Recomended', 'All books'].concat(allGenresData.allGenres) :
       ['All books'].concat(allGenresData.allGenres)
 

@@ -18,7 +18,6 @@ const LoginForm = props => {
       const token = loginRes.data.login.value
       const { username, favoriteGenre } = loginRes.data.login.user
       const bookUser = { token, username, favoriteGenre }
-      console.log('Books user: ', bookUser)
       setUser(bookUser)
       localStorage.setItem('books-user', JSON.stringify(bookUser))
     }
