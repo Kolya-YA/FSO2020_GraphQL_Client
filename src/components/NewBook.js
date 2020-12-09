@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
 import { useMutation } from '@apollo/client'
 
-import { GET_BOOKS, ALL_AUTHORS, CREATE_BOOK, ALL_GENRES } from '../queries'
+import { CREATE_BOOK } from '../queries'
 
 const NewBook = () => {
-  const [title, setTitle] = useState('Poor Folk')
+  const [title, setTitle] = useState('Poor Folk (Бедные люди)')
   const [author, setAuhtor] = useState('Fyodor Dostoevsky')
   const [published, setPublished] = useState('1846')
   const [genre, setGenre] = useState('')
@@ -14,17 +14,6 @@ const NewBook = () => {
     onError: error => {
       console.log('Add book error: ', error.graphQLErrors[0])
     },
-    update: (store, response) => {
-      const booksInStore = store.readQuery({ query: GET_BOOKS })
-      store.writeQuery({
-        query: GET_BOOKS,
-        data: {
-          ...booksInStore,
-          allBooks: [...booksInStore.allBooks, response.data.addBook]
-        }
-      })
-    },
-    refetchQueries: [{ query: ALL_AUTHORS }, { query: ALL_GENRES }]
   })
 
   const submit = (event) => {
@@ -50,7 +39,7 @@ const NewBook = () => {
       <pre>Error: {error.graphQLErrors.map(({ message }, i) => (
           <span key={i}>{message}</span>
         ))}
-        </pre>
+      </pre>
     </div>
   )
 

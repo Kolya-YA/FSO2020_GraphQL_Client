@@ -5,9 +5,13 @@ const BOOK_DETAILS = gql`
     title
     author {
         name
+        born
+        booksCount
+        id
       }
     published
     genres
+    id
   }
 `
 
@@ -32,6 +36,7 @@ query {
     name,
     born,
     booksCount
+    id
   }
 }
 `

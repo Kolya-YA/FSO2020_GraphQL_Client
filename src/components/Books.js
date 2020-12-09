@@ -1,10 +1,10 @@
-import React, { useState } from 'react'
-import { useLazyQuery, useQuery } from '@apollo/client'
+import React, { useState, useEffect } from 'react'
+import { useApolloClient, useLazyQuery, useQuery, useSubscription } from '@apollo/client'
 
-import { GET_BOOKS, ALL_GENRES } from '../queries'
-import { useEffect } from 'react'
+import { GET_BOOKS, ALL_GENRES, ALL_AUTHORS, BOOKS_SUBSCRIPTION } from '../queries'
 
 const Books = ({ user }) => {
+  const client = useApolloClient()
   
   const [getFiltredBooks, {
     loading: filtredBooksLoading,
@@ -28,6 +28,49 @@ const Books = ({ user }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [genresFilter])
 
+  const updateCacheWith = addedBook => {
+    const booksInStore = client.readQuery({ query: GET_BOOKS })
+    const genresInStore = client.readQuery({ query: ALL_GENRES })
+    const authorsInStore = client.readQuery({ query: ALL_AUTHORS })
+
+    const bookInclude = booksInStore?.allBooks.some(b => b.id === addedBook.id)
+    if (!bookInclude) {
+      client.writeQuery({
+        query: GET_BOOKS,
+        data: { allBooks: [...booksInStore.allBooks, addedBook] }
+      })
+    }
+    
+    if (genresInStore) {
+      const genresNotInclude = addedBook.genres.filter(g => !genresInStore.allGenres.includes(g))
+      if (genresNotInclude.length) {
+        client.writeQuery({
+          query: ALL_GENRES,
+          data: { allGenres: [...genresInStore.allGenres, ...genresNotInclude] }
+        })
+      }
+    }
+
+    if (authorsInStore)  {
+      const authorInclude = authorsInStore.allAuthors.some(a => a.id === addedBook.author.id)
+      if (!authorInclude) {
+        client.writeQuery({
+          query: ALL_AUTHORS,
+          data: { allAuthors: [...authorsInStore.allAuthors, addedBook.author] }
+        })
+      }
+    }
+  }
+
+  
+  useSubscription(BOOKS_SUBSCRIPTION, {
+    onSubscriptionData: ({ subscriptionData }) => {
+      const addedBook = subscriptionData.data.bookAdded
+      updateCacheWith(addedBook)
+      window.alert(`Book added: ${addedBook.title}`)
+    }
+  })
+
   const BookList = () => {
     if (filtredBooksLoading) return <div>Loading books...</div>
     if (filtredBooksError) {
@@ -36,7 +79,6 @@ const Books = ({ user }) => {
     }
       
     filtredBooksData && setBooks(filtredBooksData.allBooks)
-
     return (
       <table>
         <tbody>
