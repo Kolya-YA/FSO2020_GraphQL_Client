@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useLazyQuery, useQuery } from '@apollo/client'
 
-import { ALL_BOOKS, ALL_GENRES } from '../queries'
+import { GET_BOOKS, ALL_GENRES } from '../queries'
 import { useEffect } from 'react'
 
 const Books = ({ user }) => {
@@ -10,7 +10,7 @@ const Books = ({ user }) => {
     loading: filtredBooksLoading,
     error: filtredBooksError,
     data: filtredBooksData
-  }] = useLazyQuery(ALL_BOOKS)
+  }] = useLazyQuery(GET_BOOKS)
 
   const {
     loading: allGenresLoading,

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useMutation } from '@apollo/client'
 
-import { ALL_BOOKS, ALL_AUTHORS, CREATE_BOOK, ALL_GENRES } from '../queries'
+import { GET_BOOKS, ALL_AUTHORS, CREATE_BOOK, ALL_GENRES } from '../queries'
 
 const NewBook = () => {
   const [title, setTitle] = useState('Poor Folk')
@@ -15,9 +15,9 @@ const NewBook = () => {
       console.log('Add book error: ', error.graphQLErrors[0])
     },
     update: (store, response) => {
-      const booksInStore = store.readQuery({ query: ALL_BOOKS })
+      const booksInStore = store.readQuery({ query: GET_BOOKS })
       store.writeQuery({
-        query: ALL_BOOKS,
+        query: GET_BOOKS,
         data: {
           ...booksInStore,
           allBooks: [...booksInStore.allBooks, response.data.addBook]

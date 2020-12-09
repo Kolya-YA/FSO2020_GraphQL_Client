@@ -4,6 +4,8 @@ import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
 import Header from './components/Header'
+import { useSubscription } from '@apollo/client'
+import { BOOKS_SUBSCRIPTION } from './queries'
 
 const App = () => {
   const [user, setUser] = useState({})
@@ -14,6 +16,14 @@ const App = () => {
       setUser(loggedUser)
     }
   }, [user])
+
+
+  useSubscription(BOOKS_SUBSCRIPTION, {
+    onSubscriptionData: ({ subscriptionData }) => {
+      console.log('SD: ', subscriptionData.data.bookAdded)
+      window.alert(`Book added: ${subscriptionData.data.bookAdded.title}`)
+    }
+  })
 
   return (
     <div>
